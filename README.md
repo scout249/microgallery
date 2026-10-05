@@ -114,7 +114,7 @@ docker run -d \
   -p 8080:80 \
   -v $(pwd)/photos:/usr/share/nginx/html/photos:ro \
   --restart unless-stopped \
-  <your-dockerhub-username>/microgallery:latest
+  scout249/microgallery:latest
 ```
 
 ---
