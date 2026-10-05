@@ -61,7 +61,7 @@ version: '3.8'
 services:
   gallery:
     image: scout249/microgallery:latest
-    container_name: photo-gallery
+    container_name: microgallery
     ports:
       - "8080:80"
     volumes:
@@ -74,7 +74,7 @@ services:
 | Key | Description |
 | :--- | :--- |
 | `image` | Specifies the multi-arch Docker Hub image (`amd64` / `arm64`). |
-| `container_name` | Sets a clean name (`photo-gallery`) for easier logging and container management. |
+| `container_name` | Sets a clean name (`microgallery`) for easier logging and container management. |
 | `ports: "8080:80"` | Maps port `8080` on your host machine to port `80` (Nginx) inside the container. |
 | `volumes: ./photos:...:ro` | **Host Bind-Mount:** Mounts your host's `./photos` directory into Nginx's web root as **Read-Only (`:ro`)**, guaranteeing the container never alters or deletes your original high-res photo files. |
 | `restart: unless-stopped` | Ensures the gallery automatically restarts if your NAS or server reboots. |
@@ -110,7 +110,7 @@ If you prefer running a single CLI command without `docker-compose.yml`:
 
 ```bash
 docker run -d \
-  --name photo-gallery \
+  --name microgallery \
   -p 8080:80 \
   -v $(pwd)/photos:/usr/share/nginx/html/photos:ro \
   --restart unless-stopped \
