@@ -60,7 +60,7 @@ version: '3.8'
 
 services:
   gallery:
-    image: <your-dockerhub-username>/microgallery:latest
+    image: scout249/microgallery:latest
     container_name: photo-gallery
     ports:
       - "8080:80"
