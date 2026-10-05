@@ -1,0 +1,9 @@
+services:
+  gallery:
+    build: .
+    container_name: photo-gallery
+    ports:
+      - "8085:80"
+    volumes:
+      - ./photos:/usr/share/nginx/html/photos:ro
+    restart: unless-stopped
