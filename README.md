@@ -106,7 +106,7 @@ docker compose down
 
 ### Option B: Using `docker run` CLI
 
-If you prefer running a single CLI command without `docker-compose.yml`:
+1. If you prefer running a single CLI command without `docker-compose.yml`:
 
 ```bash
 docker run -d \
@@ -116,6 +116,11 @@ docker run -d \
   --restart unless-stopped \
   scout249/microgallery:latest
 ```
+
+2. Check execution logs to verify thumbnail generation:
+   ```bash
+   docker logs -f microgallery
+   ```
 
 ---
 
