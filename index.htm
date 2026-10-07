@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Photo Gallery</title>
 
-  <!-- Preconnect for fast loading -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 
@@ -61,8 +60,8 @@
       gap: 8px;
       overflow-x: auto;
       white-space: nowrap;
-      scrollbar-width: none; /* Firefox */
-      -ms-overflow-style: none;  /* IE/Edge */
+      scrollbar-width: none;
+      -ms-overflow-style: none;
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
       width: 100%;
@@ -71,7 +70,7 @@
     }
 
     .folder-nav::-webkit-scrollbar {
-      display: none; /* Chrome/Safari */
+      display: none;
     }
 
     .folder-btn {
@@ -95,7 +94,7 @@
       border-color: var(--text-primary);
     }
 
-    /* Main Content Container */
+    /* Main Gallery Container */
     #gallery-container {
       max-width: 935px;
       margin: 0 auto;
@@ -159,7 +158,6 @@
       transition: transform 0.3s ease, filter 0.3s ease;
     }
 
-    /* Subtle Hover Effect on Desktop */
     @media (hover: hover) {
       .insta-grid a:hover img {
         transform: scale(1.04);
@@ -170,15 +168,12 @@
 </head>
 <body>
 
-  <!-- Sticky Top Bar for Sub-directory Folders -->
   <header class="top-bar">
     <nav class="folder-nav" id="folder-nav"></nav>
   </header>
 
-  <!-- Main Instagram Grid Stream -->
   <main id="gallery-container"></main>
 
-  <!-- Main Application Script Module -->
   <script type="module" src="./main.js"></script>
 </body>
 </html>
