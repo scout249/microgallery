@@ -1,5 +1,8 @@
 FROM nginx:alpine
 
+# Force Python stdout/stderr streams to be unbuffered
+ENV PYTHONUNBUFFERED=1
+
 # Install Python3 and Pillow dependencies
 RUN apk add --no-cache python3 py3-pillow
 
