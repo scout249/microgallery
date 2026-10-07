@@ -12,12 +12,11 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5/dist/photoswipe.css">
 
   <style>
-    /* Adobe Lightroom / Apple Photos Dark Palette */
+    /* Dark Slate Palette */
     :root {
       --bg-canvas: #0a0a0c;
       --card-bg: #1c1c1e;
-      --card-shimmer: #2c2c2e;
-      --nav-bg: rgba(18, 18, 20, 0.75);
+      --nav-bg: rgba(18, 18, 20, 0.85);
       --sidebar-bg: #121214;
       --text-primary: #f2f2f7;
       --text-secondary: #8e8e93;
@@ -26,7 +25,6 @@
       --top-bar-height: 56px;
       --sidebar-width: 240px;
       --radius-sm: 6px;
-      --radius-md: 10px;
     }
 
     * {
@@ -35,38 +33,21 @@
       padding: 0;
     }
 
-    /* Custom Thin Scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: var(--bg-canvas);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #2c2c2e;
-      border-radius: 3px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #3a3a3c;
-    }
-
     html, body {
       background-color: var(--bg-canvas);
       color: var(--text-primary);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       min-height: 100vh;
     }
 
-    /* App Shell Layout */
+    /* Layout Shell */
     .app-shell {
       display: flex;
       flex-direction: column;
       min-height: 100vh;
     }
 
-    /* Mobile Sticky Glass Bar */
+    /* Mobile Header */
     .top-bar {
       position: fixed;
       top: 0;
@@ -90,9 +71,6 @@
       overflow-x: auto;
       white-space: nowrap;
       scrollbar-width: none;
-      -ms-overflow-style: none;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
       width: 100%;
     }
 
@@ -101,7 +79,7 @@
     }
 
     .folder-btn {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.08);
       color: var(--text-secondary);
       border: 1px solid transparent;
       padding: 6px 14px;
@@ -109,7 +87,6 @@
       font-size: 0.825rem;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       flex-shrink: 0;
       display: flex;
       align-items: center;
@@ -123,7 +100,7 @@
 
     .folder-btn.active,
     .folder-btn:hover {
-      background-color: rgba(255, 255, 255, 0.15);
+      background-color: rgba(255, 255, 255, 0.2);
       color: var(--text-primary);
     }
 
@@ -133,10 +110,356 @@
       font-weight: 600;
     }
 
-    /* Desktop Sidebar Nav (Hidden on Mobile) */
     .sidebar {
       display: none;
     }
 
-    /* Main Content Area */
+    /* Main Container */
     .main-content {
+      flex: 1;
+      padding-top: var(--top-bar-height);
+      width: 100%;
+    }
+
+    #gallery-container {
+      width: 100%;
+      margin: 0 auto;
+      padding: 12px 8px 40px;
+    }
+
+    .gallery-section {
+      margin-bottom: 36px;
+    }
+
+    .section-header {
+      position: sticky;
+      top: var(--top-bar-height);
+      z-index: 100;
+      background-color: rgba(10, 10, 12, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 10px 8px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 14px;
+      background-color: var(--accent-color);
+      border-radius: 2px;
+    }
+
+    .section-meta {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    /* Photo Grid */
+    .insta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+
+    .insta-grid a {
+      display: block;
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      border-radius: var(--radius-sm);
+      background-color: var(--card-bg);
+    }
+
+    .insta-grid img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      opacity: 1; /* Forced visible */
+      transition: transform 0.25s ease, filter 0.25s ease;
+    }
+
+    /* Desktop View (`>= 1024px`) */
+    @media (min-width: 1024px) {
+      .top-bar {
+        display: none;
+      }
+
+      .app-shell {
+        flex-direction: row;
+      }
+
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        width: var(--sidebar-width);
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: var(--sidebar-bg);
+        border-right: 1px solid var(--border-color);
+        padding: 24px 16px;
+        z-index: 1000;
+      }
+
+      .sidebar-brand {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 24px;
+        padding-left: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .sidebar-brand-icon {
+        width: 10px;
+        height: 10px;
+        background-color: var(--accent-color);
+        border-radius: 50%;
+      }
+
+      .sidebar .folder-nav {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+      }
+
+      .sidebar .folder-btn {
+        border-radius: var(--radius-sm);
+        padding: 8px 12px;
+        font-size: 0.875rem;
+        justify-content: space-between;
+      }
+
+      .main-content {
+        padding-top: 0;
+        margin-left: var(--sidebar-width);
+      }
+
+      #gallery-container {
+        padding: 24px 24px 60px;
+      }
+
+      .section-header {
+        top: 0;
+        padding: 16px 0;
+      }
+
+      .insta-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+      }
+    }
+
+    @media (min-width: 1440px) {
+      .insta-grid {
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+      }
+    }
+
+    @media (hover: hover) {
+      .insta-grid:hover a {
+        opacity: 0.65;
+      }
+      .insta-grid a:hover {
+        opacity: 1 !important;
+        transform: scale(1.03);
+        z-index: 10;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-shell">
+    <header class="top-bar">
+      <nav class="folder-nav" id="folder-nav-mobile"></nav>
+    </header>
+
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="sidebar-brand-icon"></span>
+        <span>Library</span>
+      </div>
+      <nav class="folder-nav" id="folder-nav-desktop"></nav>
+    </aside>
+
+    <main class="main-content">
+      <div id="gallery-container"></div>
+    </main>
+  </div>
+
+  <script type="module">
+    import PhotoSwipeLightbox from 'https://cdn.jsdelivr.net/npm/photoswipe@5/dist/photoswipe-lightbox.esm.js';
+    import { gallerySections } from './images.js';
+
+    let lightbox = null;
+
+    function initGallery() {
+      const container = document.getElementById('gallery-container');
+      const mobileNav = document.getElementById('folder-nav-mobile');
+      const desktopNav = document.getElementById('folder-nav-desktop');
+
+      if (!container) return;
+
+      if (mobileNav) renderNav(mobileNav);
+      if (desktopNav) renderNav(desktopNav);
+
+      renderSections(container);
+      initLightbox();
+    }
+
+    function renderNav(navContainer) {
+      const fragment = document.createDocumentFragment();
+      const totalPhotos = gallerySections.reduce((acc, sec) => acc + (sec.items ? sec.items.length : 0), 0);
+
+      const allBtn = document.createElement('button');
+      allBtn.className = 'folder-btn active';
+      allBtn.dataset.target = 'all';
+      allBtn.innerHTML = `<span>All Photos</span><span class="count">${totalPhotos}</span>`;
+      allBtn.addEventListener('click', (e) => handleNavClick(e, 'all'));
+      fragment.appendChild(allBtn);
+
+      gallerySections.forEach((section, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'folder-btn';
+        btn.dataset.target = `section-${index}`;
+        const count = section.items ? section.items.length : 0;
+        btn.innerHTML = `<span>${section.title}</span><span class="count">${count}</span>`;
+        btn.addEventListener('click', (e) => handleNavClick(e, `section-${index}`));
+        fragment.appendChild(btn);
+      });
+
+      navContainer.appendChild(fragment);
+    }
+
+    function handleNavClick(event, targetId) {
+      document.querySelectorAll('.folder-btn').forEach((btn) => {
+        if (btn.dataset.target === targetId) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      if (targetId === 'all') {
+        document.querySelectorAll('.gallery-section').forEach((sec) => sec.style.display = 'block');
+      } else {
+        document.querySelectorAll('.gallery-section').forEach((sec) => {
+          sec.style.display = sec.id === targetId ? 'block' : 'none';
+        });
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderSections(container) {
+      const fragment = document.createDocumentFragment();
+
+      gallerySections.forEach((section, index) => {
+        const sectionEl = document.createElement('section');
+        sectionEl.className = 'gallery-section';
+        sectionEl.id = `section-${index}`;
+
+        const isRoot = section.path === '.';
+        const photoBasePath = isRoot ? './photos' : `./photos/${section.path}`;
+        const thumbBasePath = isRoot ? './thumbs' : `./thumbs/${section.path}`;
+
+        const itemCount = section.items ? section.items.length : 0;
+
+        const itemsHTML = section.items
+          .map((item) => {
+            let filename, width, height, src, thumb;
+
+            // Universal Parser: supports both object & array formats
+            if (Array.isArray(item)) {
+              filename = item[0];
+              width = item[1];
+              height = item[2];
+              src = `${photoBasePath}/${filename}`;
+              thumb = `${thumbBasePath}/${filename}`;
+            } else {
+              src = item.src;
+              thumb = item.thumb;
+              width = item.width;
+              height = item.height;
+              filename = src.split('/').pop();
+            }
+
+            const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.'));
+            const alt = nameWithoutExt.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+
+            return `
+              <a 
+                href="${src}" 
+                data-pswp-width="${width}" 
+                data-pswp-height="${height}" 
+                target="_blank"
+                rel="noreferrer"
+              >
+                <img 
+                  src="${thumb}" 
+                  alt="${alt}" 
+                  loading="lazy" 
+                  decoding="async"
+                />
+              </a>
+            `;
+          })
+          .join('');
+
+        sectionEl.innerHTML = `
+          <div class="section-header">
+            <h2 class="section-title">${section.title}</h2>
+            <span class="section-meta">${itemCount} photos</span>
+          </div>
+          <div class="insta-grid">${itemsHTML}</div>
+        `;
+
+        fragment.appendChild(sectionEl);
+      });
+
+      container.appendChild(fragment);
+    }
+
+    function initLightbox() {
+      if (lightbox) lightbox.destroy();
+
+      lightbox = new PhotoSwipeLightbox({
+        gallery: '#gallery-container',
+        children: '.insta-grid a',
+        pswpModule: () => import('https://cdn.jsdelivr.net/npm/photoswipe@5/dist/photoswipe.esm.js'),
+        bgOpacity: 0.96,
+        showHideAnimationType: 'zoom'
+      });
+
+      lightbox.init();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initGallery);
+    } else {
+      initGallery();
+    }
+  </script>
+</body>
+</html>
