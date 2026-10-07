@@ -20,7 +20,7 @@ function initGallery() {
 function renderFolderNav(navContainer) {
   const fragment = document.createDocumentFragment();
 
-  // Total library photo count
+  // Calculate total photos across all sections
   const totalPhotos = gallerySections.reduce((acc, sec) => acc + (sec.items ? sec.items.length : 0), 0);
 
   // 'All' Filter Button
@@ -31,7 +31,7 @@ function renderFolderNav(navContainer) {
   allBtn.addEventListener('click', (e) => handleNavClick(e, 'all'));
   fragment.appendChild(allBtn);
 
-  // Folder Buttons
+  // Folder Navigation Buttons
   gallerySections.forEach((section, index) => {
     const btn = document.createElement('button');
     btn.className = 'folder-btn';
@@ -88,9 +88,23 @@ function renderGallerySections(container) {
     const itemCount = section.items ? section.items.length : 0;
 
     const itemsHTML = section.items
-      .map(([filename, width, height]) => {
-        const src = `${photoBasePath}/${filename}`;
-        const thumb = `${thumbBasePath}/${filename}`;
+      .map((item) => {
+        // Universal parser: Handles both new array [filename, w, h] and old object format
+        let filename, width, height, src, thumb;
+
+        if (Array.isArray(item)) {
+          filename = item[0];
+          width = item[1];
+          height = item[2];
+          src = `${photoBasePath}/${filename}`;
+          thumb = `${thumbBasePath}/${filename}`;
+        } else {
+          src = item.src;
+          thumb = item.thumb;
+          width = item.width;
+          height = item.height;
+          filename = src.split('/').pop();
+        }
 
         const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.'));
         const alt = nameWithoutExt.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
