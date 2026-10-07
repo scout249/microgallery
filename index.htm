@@ -29,12 +29,16 @@
       padding: 0;
     }
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-primary);
+    html, body {
+      background-color: #000000;
+      color: #f5f5f5;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
-      padding-top: var(--top-bar-height);
+      min-height: 100vh;
+    }
+
+    body {
+      padding-top: 60px;
     }
 
     /* Sticky Top Navigation Bar */
@@ -43,11 +47,11 @@
       top: 0;
       left: 0;
       right: 0;
-      height: var(--top-bar-height);
-      background-color: var(--nav-bg);
+      height: 60px;
+      background-color: rgba(0, 0, 0, 0.85);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid #262626;
       z-index: 1000;
       display: flex;
       align-items: center;
@@ -75,12 +79,121 @@
 
     .folder-btn {
       background: transparent;
-      color: var(--text-secondary);
-      border: 1px solid var(--border-color);
+      color: #a8a8a8;
+      border: 1px solid #262626;
       padding: 6px 16px;
       border-radius: 20px;
       font-size: 0.875rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
-      flex-shrink: 0
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .folder-btn.active,
+    .folder-btn:hover {
+      background-color: #f5f5f5;
+      color: #000000;
+      border-color: #f5f5f5;
+    }
+
+    /* Main Gallery Container */
+    #gallery-container {
+      width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 12px 0 40px;
+      min-height: calc(100vh - 60px);
+    }
+
+    .gallery-section {
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f5f5f5;
+      padding: 12px 16px;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 16px;
+      background-color: #0095f6;
+      border-radius: 2px;
+    }
+
+    /* Base Layout (Mobile Portrait): 3 Columns */
+    .insta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3px;
+    }
+
+    /* Tablet & Laptop (768px – 1439px): 5 Columns */
+    @media (min-width: 768px) {
+      .insta-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+      }
+      #gallery-container {
+        max-width: 1200px;
+        padding: 20px 16px 60px;
+      }
+    }
+
+    /* Large Widescreen Desktop (>= 1440px): 7 Columns */
+    @media (min-width: 1440px) {
+      .insta-grid {
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+      }
+      #gallery-container {
+        max-width: 1600px;
+      }
+    }
+
+    .insta-grid a {
+      display: block;
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background-color: #121212;
+    }
+
+    .insta-grid img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease, filter 0.3s ease;
+    }
+
+    @media (hover: hover) {
+      .insta-grid a:hover img {
+        transform: scale(1.04);
+        filter: brightness(0.85);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="top-bar">
+    <nav class="folder-nav" id="folder-nav"></nav>
+  </header>
+
+  <main id="gallery-container"></main>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
