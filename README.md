@@ -16,6 +16,15 @@ On container startup, an automated Python background worker scans your high-reso
 
 ---
 
+## 1. Quick Start
+Run the container inside any directory containing images (and/or image subfolders):
+
+```bash
+docker run -d -p 8080:80 -v $(pwd):/input:ro scout249/microgallery
+```
+
+
+
 ## 1. Directory Setup & Adding Photos
 
 Before launching the container, create the host directory layout and copy your photos into the `photos` directory.
