@@ -13,6 +13,12 @@ COPY index.htm main.js ./
 COPY generate_gallery.py /app/generate_gallery.py
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
+# 1. Symlink /input/photos to /usr/share/nginx/html/photos
+# 2. Create internal writeable /tmp/thumbs directory and symlink it to /usr/share/nginx/html/thumbs
+RUN mkdir -p /tmp/thumbs && \
+    ln -s /input/photos /usr/share/nginx/html/photos && \
+    ln -s /tmp/thumbs /usr/share/nginx/html/thumbs
+
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 80
