@@ -28,12 +28,11 @@ mkdir -p photos
 ```
 
 ### Organize Your Images
-Place your images inside the `photos` directory. You can organize photos into subfolders—`microgallery` will automatically group images by folder names:
+Place your images inside the directory. You can organize photos into subfolders—`microgallery` will automatically group images by folder names:
 
 ```text
 microgallery/
 ├── docker-compose.yml
-└── photos/
     ├── Paris/
     │   ├── IMG_001.jpg
     │   └── IMG_002.jpg
