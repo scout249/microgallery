@@ -6,8 +6,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from PIL import Image, ImageOps
 
 # Base Paths
-PHOTOS_DIR = Path("/input/photos")            # Read-only mount from host
-THUMBS_DIR = Path("/tmp/thumbs")              # Writeable internal container directory
+PHOTOS_DIR = Path("/input")                   # Scans directly from root of mounted folder
+THUMBS_DIR = Path("/tmp/thumbs")              # Internal container writeable directory
 OUTPUT_JS = Path("/usr/share/nginx/html/images.js")
 CACHE_FILE = THUMBS_DIR / ".metadata_cache.json"
 
@@ -26,7 +26,6 @@ def process_image(rel_path_str, cached_meta):
         print(f"Error stat file {src_path}: {e}")
         return None
 
-    # Check if we can use cached metadata and skip thumbnail generation
     meta = cached_meta.get(rel_path_str)
     if meta and meta.get("mtime") == src_mtime and thumb_path.exists():
         return rel_path_str, {
@@ -38,13 +37,11 @@ def process_image(rel_path_str, cached_meta):
             "mtime": src_mtime
         }
 
-    # If missing or modified, open with Pillow
     try:
         with Image.open(src_path) as img:
             img = ImageOps.exif_transpose(img)
             width, height = img.size
 
-            # Generate thumbnail inside /tmp/thumbs
             if not thumb_path.exists() or thumb_path.stat().st_mtime < src_mtime:
                 thumb_path.parent.mkdir(parents=True, exist_ok=True)
                 thumb_img = img.copy()
@@ -72,7 +69,6 @@ def main():
     start_time = time.time()
     THUMBS_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Load persistent metadata cache from /tmp/thumbs
     cached_meta = {}
     if CACHE_FILE.exists():
         try:
@@ -80,7 +76,6 @@ def main():
         except Exception:
             cached_meta = {}
 
-    # Collect image files
     all_files = []
     for root, _, files in os.walk(PHOTOS_DIR):
         root_path = Path(root)
@@ -90,9 +85,8 @@ def main():
                 rel_path = full_path.relative_to(PHOTOS_DIR)
                 all_files.append(rel_path.as_posix())
 
-    print(f"Found {len(all_files)} images. Processing gallery...")
+    print(f"Found {len(all_files)} images under /input. Processing gallery...")
 
-    # Parallel processing using cache
     items_by_section = {}
     new_cache = {}
 
@@ -105,14 +99,13 @@ def main():
                 rel_path_str, data = res
                 rel_path = Path(rel_path_str)
                 
-                # Save to new cache dictionary
                 new_cache[rel_path_str] = {
                     "width": data["width"],
                     "height": data["height"],
                     "mtime": data["mtime"]
                 }
 
-                # Group by section
+                # Set section name to subdirectory name, or "General" if the image is in the root directory
                 section_name = rel_path.parent.as_posix()
                 if section_name == ".":
                     section_name = "General"
@@ -123,13 +116,11 @@ def main():
                 clean_item = {k: v for k, v in data.items() if k != "mtime"}
                 items_by_section[section_name].append(clean_item)
 
-    # Save metadata cache to /tmp/thumbs
     try:
         CACHE_FILE.write_text(json.dumps(new_cache, indent=2), encoding="utf-8")
     except Exception as e:
         print(f"Warning: Failed to write metadata cache: {e}")
 
-    # Export images.js
     formatted_sections = []
     for title, items in sorted(items_by_section.items()):
         formatted_sections.append({
