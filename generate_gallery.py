@@ -23,17 +23,15 @@ def process_image(rel_path_str, cached_meta):
         src_stat = src_path.stat()
         src_mtime = src_stat.st_mtime
     except Exception as e:
-        print(f"Error stat file {src_path}: {e}")
+        print(f"Error stat file {src_path}: {e}", flush=True)
         return None
 
     meta = cached_meta.get(rel_path_str)
     if meta and meta.get("mtime") == src_mtime and thumb_path.exists():
         return rel_path_str, {
-            "src": f"./photos/{rel_path.as_posix()}",
-            "thumb": f"./thumbs/{rel_path.as_posix()}",
+            "filename": rel_path.name,
             "width": meta["width"],
             "height": meta["height"],
-            "alt": rel_path.stem.replace("_", " ").title(),
             "mtime": src_mtime
         }
 
@@ -51,18 +49,16 @@ def process_image(rel_path_str, cached_meta):
                     thumb_img = thumb_img.convert("RGB")
                     
                 thumb_img.save(thumb_path, "JPEG", quality=80, optimize=True)
-                print(f"Generated thumb: {rel_path}")
+                print(f"Generated thumb: {rel_path}", flush=True)
 
             return rel_path_str, {
-                "src": f"./photos/{rel_path.as_posix()}",
-                "thumb": f"./thumbs/{rel_path.as_posix()}",
+                "filename": rel_path.name,
                 "width": width,
                 "height": height,
-                "alt": rel_path.stem.replace("_", " ").title(),
                 "mtime": src_mtime
             }
     except Exception as e:
-        print(f"Error processing {src_path}: {e}")
+        print(f"Error processing {src_path}: {e}", flush=True)
         return None
 
 def main():
@@ -85,9 +81,9 @@ def main():
                 rel_path = full_path.relative_to(PHOTOS_DIR)
                 all_files.append(rel_path.as_posix())
 
-    print(f"Found {len(all_files)} images under /input. Processing gallery...")
+    print(f"Found {len(all_files)} images under /input. Processing gallery...", flush=True)
 
-    items_by_section = {}
+    sections_data = {}
     new_cache = {}
 
     with ProcessPoolExecutor() as executor:
@@ -105,34 +101,36 @@ def main():
                     "mtime": data["mtime"]
                 }
 
-                # Set section name to subdirectory name, or "General" if the image is in the root directory
-                section_name = rel_path.parent.as_posix()
-                if section_name == ".":
-                    section_name = "General"
+                # Extract directory path relative to /input
+                section_path = rel_path.parent.as_posix()
+                if section_path not in sections_data:
+                    sections_data[section_path] = []
                 
-                if section_name not in items_by_section:
-                    items_by_section[section_name] = []
-                
-                clean_item = {k: v for k, v in data.items() if k != "mtime"}
-                items_by_section[section_name].append(clean_item)
+                # Store compact item tuple: [filename, width, height]
+                sections_data[section_path].append((data["filename"], data["width"], data["height"]))
 
     try:
         CACHE_FILE.write_text(json.dumps(new_cache, indent=2), encoding="utf-8")
     except Exception as e:
-        print(f"Warning: Failed to write metadata cache: {e}")
+        print(f"Warning: Failed to write metadata cache: {e}", flush=True)
 
+    # Build compact array output
     formatted_sections = []
-    for title, items in sorted(items_by_section.items()):
+    for path, items in sorted(sections_data.items()):
+        title = "General" if path == "." else path.split("/")[-1]
+        sorted_items = sorted(items, key=lambda x: x[0])
+        
         formatted_sections.append({
             "title": title,
-            "items": sorted(items, key=lambda x: x["src"])
+            "path": path,
+            "items": sorted_items
         })
 
-    js_content = f"export const gallerySections = {json.dumps(formatted_sections, indent=2)};\n"
+    js_content = f"export const gallerySections = {json.dumps(formatted_sections, separators=(',', ':'))};\n"
     OUTPUT_JS.write_text(js_content, encoding="utf-8")
 
     elapsed = time.time() - start_time
-    print(f"Gallery build completed in {elapsed:.2f} seconds.")
+    print(f"Gallery build completed in {elapsed:.2f} seconds.", flush=True)
 
 if __name__ == "__main__":
     main()
