@@ -9,20 +9,14 @@ function initGallery() {
 
   if (!container || !navContainer) return;
 
-  // Render Top Folder Navigation
   renderFolderNav(navContainer);
-
-  // Render Gallery Content
   renderGallerySections(container);
-
-  // Initialize PhotoSwipe Lightbox
   initLightbox();
 }
 
 function renderFolderNav(navContainer) {
   const fragment = document.createDocumentFragment();
 
-  // "All" Tab
   const allBtn = document.createElement('button');
   allBtn.className = 'folder-btn active';
   allBtn.textContent = 'All';
@@ -30,7 +24,6 @@ function renderFolderNav(navContainer) {
   allBtn.addEventListener('click', (e) => handleNavClick(e, 'all'));
   fragment.appendChild(allBtn);
 
-  // Sub-directory Folder Tabs
   gallerySections.forEach((section, index) => {
     const btn = document.createElement('button');
     btn.className = 'folder-btn';
@@ -44,18 +37,15 @@ function renderFolderNav(navContainer) {
 }
 
 function handleNavClick(event, targetId) {
-  // Update active pill state
   document.querySelectorAll('.folder-btn').forEach((btn) => btn.classList.remove('active'));
   event.currentTarget.classList.add('active');
 
   if (targetId === 'all') {
-    // Show all sections
     document.querySelectorAll('.gallery-section').forEach((sec) => {
       sec.style.display = 'block';
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else {
-    // Filter to selected sub-directory or scroll to it
     const targetEl = document.getElementById(targetId);
     if (targetEl) {
       document.querySelectorAll('.gallery-section').forEach((sec) => {
@@ -65,7 +55,6 @@ function handleNavClick(event, targetId) {
     }
   }
 
-  // Keep active pill scrolled into view in top bar
   event.currentTarget.scrollIntoView({
     behavior: 'smooth',
     block: 'nearest',
@@ -81,21 +70,31 @@ function renderGallerySections(container) {
     sectionEl.className = 'gallery-section';
     sectionEl.id = `section-${index}`;
 
+    // Base paths for photos and thumbs in this section
+    const isRoot = section.path === '.';
+    const photoBasePath = isRoot ? './photos' : `./photos/${section.path}`;
+    const thumbBasePath = isRoot ? './thumbs' : `./thumbs/${section.path}`;
+
     const itemsHTML = section.items
-      .map((item) => {
-        const thumbnailUrl = item.thumb || item.src;
+      .map(([filename, width, height]) => {
+        const src = `${photoBasePath}/${filename}`;
+        const thumb = `${thumbBasePath}/${filename}`;
+
+        // Derive clean alt text from filename dynamically
+        const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.'));
+        const alt = nameWithoutExt.replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
 
         return `
           <a 
-            href="${item.src}" 
-            data-pswp-width="${item.width}" 
-            data-pswp-height="${item.height}" 
+            href="${src}" 
+            data-pswp-width="${width}" 
+            data-pswp-height="${height}" 
             target="_blank"
             rel="noreferrer"
           >
             <img 
-              src="${thumbnailUrl}" 
-              alt="${item.alt || ''}" 
+              src="${thumb}" 
+              alt="${alt}" 
               loading="lazy" 
               decoding="async"
             />
