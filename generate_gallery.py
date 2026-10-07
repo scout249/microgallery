@@ -6,8 +6,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from PIL import Image, ImageOps
 
 # Base Paths
-PHOTOS_DIR = Path("/usr/share/nginx/html/photos")
-THUMBS_DIR = Path("/usr/share/nginx/html/thumbs")
+PHOTOS_DIR = Path("/input/photos")            # Read-only mount from host
+THUMBS_DIR = Path("/tmp/thumbs")              # Writeable internal container directory
 OUTPUT_JS = Path("/usr/share/nginx/html/images.js")
 CACHE_FILE = THUMBS_DIR / ".metadata_cache.json"
 
@@ -26,7 +26,7 @@ def process_image(rel_path_str, cached_meta):
         print(f"Error stat file {src_path}: {e}")
         return None
 
-    # Check if we can use cached metadata and skipped thumbnail generation
+    # Check if we can use cached metadata and skip thumbnail generation
     meta = cached_meta.get(rel_path_str)
     if meta and meta.get("mtime") == src_mtime and thumb_path.exists():
         return rel_path_str, {
@@ -44,7 +44,7 @@ def process_image(rel_path_str, cached_meta):
             img = ImageOps.exif_transpose(img)
             width, height = img.size
 
-            # Generate thumbnail if needed
+            # Generate thumbnail inside /tmp/thumbs
             if not thumb_path.exists() or thumb_path.stat().st_mtime < src_mtime:
                 thumb_path.parent.mkdir(parents=True, exist_ok=True)
                 thumb_img = img.copy()
@@ -72,7 +72,7 @@ def main():
     start_time = time.time()
     THUMBS_DIR.mkdir(parents=True, exist_ok=True)
 
-    # 1. Load persistent metadata cache
+    # Load persistent metadata cache from /tmp/thumbs
     cached_meta = {}
     if CACHE_FILE.exists():
         try:
@@ -80,7 +80,7 @@ def main():
         except Exception:
             cached_meta = {}
 
-    # 2. Collect image files
+    # Collect image files
     all_files = []
     for root, _, files in os.walk(PHOTOS_DIR):
         root_path = Path(root)
@@ -92,7 +92,7 @@ def main():
 
     print(f"Found {len(all_files)} images. Processing gallery...")
 
-    # 3. Parallel processing using cache
+    # Parallel processing using cache
     items_by_section = {}
     new_cache = {}
 
@@ -120,17 +120,16 @@ def main():
                 if section_name not in items_by_section:
                     items_by_section[section_name] = []
                 
-                # Strip out internal mtime field before exporting to images.js
                 clean_item = {k: v for k, v in data.items() if k != "mtime"}
                 items_by_section[section_name].append(clean_item)
 
-    # 4. Save metadata cache to disk
+    # Save metadata cache to /tmp/thumbs
     try:
         CACHE_FILE.write_text(json.dumps(new_cache, indent=2), encoding="utf-8")
     except Exception as e:
         print(f"Warning: Failed to write metadata cache: {e}")
 
-    # 5. Export images.js
+    # Export images.js
     formatted_sections = []
     for title, items in sorted(items_by_section.items()):
         formatted_sections.append({
