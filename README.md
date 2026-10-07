@@ -112,9 +112,9 @@ docker compose down
 docker run -d \
   --name microgallery \
   -p 8080:80 \
-  -v $(pwd)/photos:/usr/share/nginx/html/photos:ro \
+  -v $(pwd):/input:ro \
   --restart unless-stopped \
-  scout249/microgallery:latest
+  scout249/microgallery
 ```
 
 2. Check execution logs to verify thumbnail generation:
